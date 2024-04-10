@@ -1,59 +1,75 @@
+{% load static %}
 <!DOCTYPE html>
-<html language="zh-cn">
-  <head>
-    {% load static %}
-    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js" type="text/javascript"></script>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>社交网络</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="{% static 'js/WXLsearch.js' %}"></script>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>王晓黎豆瓣项目</title>
-  </head>
-  <body>  
-    <h1>豆瓣电影</h1>
-    <form id="wxlformsearch" action="" method="get" class="form-horizontal" role="form">
-        <input id="submit2search" name="submit2search" type="search" placeholder="检索" value="">
-        <input id="btn-submit2search" name="btn-submit2search" type="button" class="form-control btn btn-success" value="检索">
-    </form>
-    <form id="wxlform" action="" method="post" class="form-horizontal" role="form">
-        <input id="submit2index" name="submit2index" type="button" class="form-control btn btn-success" value="新建索引">
-    </form>
-    <div>
-        <table id="moview-result-list-table" border="1" cellspacing="1" cellpadding="1" >
-            <tr>
-                <th>ID</th>
-                <th>电影名称</th>
-                <th>导演</th>
-                <th>演员</th>
-                <th>简介</th>
-            </tr>
-            {% for data in data_list %}
-                <tr class="movie-entry" id="{{ data.id }}">
-                    <td>{{ data.id }}</td>
-                    <td>{{ data.movie_title }}</td>
-                    <td>{{ data.movie_directors }}</td>
-                    <td>{{ data.movie_actors }}</td>
-                    <td>{{ data.movie_description }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-        <ul class="pagination">
-            {% if page_object.has_previous %}
-                <li>
-                <a href="?page={{ page_object.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-                </li>
-            {% endif %}
-            {% for pg in page_object.paginator.page_range %}
-            {% if page_object.number == pg %}
-            <li class="active"><a href="?page={{ pg }}">{{ pg }}</a></li>
-            {% else %}
-            <li><a href="?page={{ pg }}">{{ pg }}</a></li>
-            {% endif %}
-            {% endfor %}
-            {% if page_object.has_next %}
-                <li>
-                    <a href="?page={{ page_object.next_page_number }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
-            {% endif %}
-        </ul>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">微博评论</h1>
+        <form id="wxlformsearch" action="" method="get" class="form-horizontal" role="form">
+            <div class="row">
+                <div class="col">
+                    <input id="submit2search" name="submit2search" type="search" placeholder="检索" value="" class="form-control">
+                </div>
+                <div class="col">
+                    <input id="btn-submit2search" name="btn-submit2search" type="button" class="form-control btn btn-success mt-2" value="检索">
+                </div>
+            </div>
+        </form>
+        <form id="wxlform" action="" method="post" class="form-horizontal" role="form">
+            <input id="submit2index" name="submit2index" type="button" class="form-control btn btn-success mt-2" value="新建索引">
+        </form>
+        <div class="mt-4">
+            <table id="moview-result-list-table" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>电影名称</th>
+                        <th>导演</th>
+                        <th>演员</th>
+                        <th>简介</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in data_list %}
+                        <tr class="movie-entry" id="{{ data.id }}">
+                            <td>{{ data.id }}</td>
+                            <td>{{ data.movie_title }}</td>
+                            <td>{{ data.movie_directors }}</td>
+                            <td>{{ data.movie_actors }}</td>
+                            <td>{{ data.movie_description }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <ul class="pagination">
+                {% if page_object.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_object.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                    </li>
+                {% endif %}
+                {% for pg in page_object.paginator.page_range %}
+                    {% if page_object.number == pg %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ pg }}">{{ pg }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ pg }}">{{ pg }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_object.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_object.next_page_number }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-  </body>  
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
 </html>
