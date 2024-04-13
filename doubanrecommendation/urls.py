@@ -20,12 +20,25 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from movierecommendation import views
 
 urlpatterns = [
-    url(r'^movieRecommendation', include('movierecommendation.urls')),
+    url(r'^movie', include('movierecommendation.urls')),
+    url(r'^weibo', include('movierecommendation.urls')),
+    url(r'^movie', views.doubanRecommendation),
+    url(r'^weibo', views.weiboRecommendation),
+
     url(r'^buildindex', include('movierecommendation.urls')),
+
     url(r'^admin', admin.site.urls),
     url(r'^$', views.doubanRecommendation),
-    url(r'^movieRecommendation', views.doubanRecommendation),
+
     url(r'^buildindex', views.buildindex),
-    url(r'^searchindex', views.searchindex)
+    url(r'^searchindex', views.searchindex),
+    url(r'^weibobuildindex', views.weibobuildindex),
+    url(r'^weibobuildindex', include('movierecommendation.urls')),
+
 ]
 urlpatterns += staticfiles_urlpatterns()
+
+
+
+
+

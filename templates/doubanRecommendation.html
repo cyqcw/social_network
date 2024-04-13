@@ -8,23 +8,24 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="{% static 'js/WXLsearch.js' %}"></script>
+    <script src="{% static 'js/mysearch.js' %}"></script>
 </head>
+
 <body>
     <div class="container">
         <h1 class="text-center my-4">微博评论</h1>
-        <form id="wxlformsearch" action="" method="get" class="form-horizontal" role="form">
-            <div class="row">
-                <div class="col">
-                    <input id="submit2search" name="submit2search" type="search" placeholder="检索" value="" class="form-control">
-                </div>
-                <div class="col">
-                    <input id="btn-submit2search" name="btn-submit2search" type="button" class="form-control btn btn-success mt-2" value="检索">
-                </div>
+        <form id="wxlformsearch" action="" method="get" class="form-inline" role="form">
+            <div class="form-group mb-2">
+                <input id="submit2search" name="submit2search" type="search" placeholder="检索" value="" class="form-control">
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+                <input id="btn-submit2search" name="btn-submit2search" type="button" class="form-control btn btn-success" value="检索">
             </div>
         </form>
-        <form id="wxlform" action="" method="post" class="form-horizontal" role="form">
-            <input id="submit2index" name="submit2index" type="button" class="form-control btn btn-success mt-2" value="新建索引">
+        <form id="wxlform" action="" method="post" class="form-inline" role="form">
+            <div class="form-group mb-2">
+                <input id="submit2index" name="submit2index" type="button" class="form-control btn btn-success" value="新建索引">
+            </div>
         </form>
         <div class="mt-4">
             <table id="moview-result-list-table" class="table table-striped">

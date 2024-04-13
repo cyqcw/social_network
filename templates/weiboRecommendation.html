@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>微博数据分析</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="{% static 'js/mysearch.js' %}"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">微博评论</h1>
+        <form id="myformsearch" action="" method="get" class="form-inline" role="form">
+            <div class="form-group mb-2">
+                <input id="submit2search" name="submit2search" type="search" placeholder="检索" value="" class="form-control">
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+                <input id="btn-submit2search" name="btn-submit2search" type="button" class="form-control btn btn-success" value="检索">
+            </div>
+        </form>
+        <form id="myform" action="" method="post" class="form-inline" role="form">
+            <div class="form-group mb-2">
+                <input id="weibosubmit2index" name="weibosubmit2index" type="button" class="form-control btn btn-success" value="新建索引">
+            </div>
+        </form>
+        <div class="mt-4">
+            <table id="comment-result-list-table" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>评论内容</th>
+                        <th>评论时间</th>
+                        <th>评论用户</th>
+                        <th>地址</th>
+                        <th>用户性别</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in data_list %}
+                        <tr class="comment-entry" id="{{ data.id }}">
+                            <td>{{ data.id }}</td>
+                            <td>{{ data.content }}</td>
+                            <td>{{ data.create_date_time }}</td>
+                            <td>{{ data.nickname }}</td>
+                            <td>{{ data.ip_location }}</td>
+                            <td>{{ data.gender }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <ul class="pagination">
+                {% if page_object.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_object.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                    </li>
+                {% endif %}
+                {% for pg in page_object.paginator.page_range %}
+                    {% if page_object.number == pg %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ pg }}">{{ pg }}</a></li>
+                    {% else %}
+                    {% endif %}
+                {% endfor %}
+                {% if page_object.has_next %}
+                {% endif %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_object.next_page_number }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+                    </li>
+                        <li class="page-item"><a class="page-link" href="?page={{ pg }}">{{ pg }}</a></li>
+            </ul>
+        </div>
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>
