@@ -18,8 +18,6 @@ class DoubanMovieIndex(models.Model):
     def __str__(self):
         return self.movie_keyword
 
-
-
 # 微博表
 class WeiboComments(models.Model):
     comment_id = models.BigIntegerField(null=True)
@@ -55,6 +53,5 @@ class WeiboNotes(models.Model):
 class WeiboNoteIndex(models.Model):
     note_keyword = models.CharField(max_length=256)
     note_doclist = models.TextField()
-
     def __str__(self):
         return self.note_keyword

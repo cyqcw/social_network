@@ -32,9 +32,10 @@ urlpatterns = [
 
     url(r'^buildindex', views.buildindex),
     url(r'^searchindex', views.searchindex),
-    url(r'^weibobuildindex', views.weibobuildindex),
-    url(r'^weibobuildindex', include('movierecommendation.urls')),
-
+    url(r'^wbbuildindex', views.weibobuildindex),
+    url(r'^wbbuildindex', include('movierecommendation.urls')),
+    url(r'^wbsearchindex', views.weiboSearchIndex),
+    url(r'^wbsearchindex', include('movierecommendation.urls')),
 ]
 urlpatterns += staticfiles_urlpatterns()
 

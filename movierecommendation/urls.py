@@ -7,6 +7,6 @@ urlpatterns = [
 
     url(r'^buildindex', views.buildindex, name='doubanIndex'),
     url(r'^searchindex', views.searchindex, name='searchIndex'),
-    url(r'^weibobuildindex', views.weibobuildindex, name='weiboIndex'),
 
+    url(r'^wbbuildindex', views.weibobuildindex, name='weiboIndex'),
 ]

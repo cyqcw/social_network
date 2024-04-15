@@ -61,3 +61,5 @@ class WeiboCommentIndexAdmin(ImportExportModelAdmin):
     list_display = ('comment_keyword', 'comment_doclist')
     search_fields = ('comment_keyword',)
     resource_class = WeiboCommentIndexResource
+
+
