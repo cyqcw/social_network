@@ -168,7 +168,7 @@ def weibobuildindex(request):
             for word in open(file_path, encoding='utf-8'):
                 stopwords.append(word.strip())
             print("stopwords = ", stopwords)
-            # 获取所有微博评论的文本属性用于索引
+            # 获取所有微博的文本属性用于索引
             note_list = WeiboNotes.objects.values('id', 'content', 'nickname', 'ip_location')
             print("note_list = ", len(note_list))
             all_keywords = []
@@ -191,6 +191,13 @@ def weibobuildindex(request):
                         keywordlist.append(word)
                 all_keywords.extend(keywordlist)
                 note_set[note_id] = keywordlist
+                # 记录关键词在微博数据中出现的词频
+                keywordCount = {}
+                unique_keywords = set(keywordlist)
+                for keyword in unique_keywords:
+                    keywordCount[keyword] = keywordlist.count(keyword)
+                print("keywordCount = ", keywordCount)
+
             # 利用set删除重复keywords
             set_all_keywords = set(all_keywords)
             print("set_all_keywords", set_all_keywords)
@@ -201,7 +208,7 @@ def weibobuildindex(request):
                     cut_text = note_set[c_id]
                     if term in cut_text:
                         temp.append(c_id)
-                print("temp = ", temp, "key", term)
+                print("list = ", temp, "key", term)
                 # 存储索引到数据库
                 try:
                     exist_list = WeiboNoteIndex.objects.get(note_keyword=term)
@@ -224,9 +231,6 @@ def calculate_similarity(str1, str2):
     return fuzz.ratio(str1, str2)
 
 
-
-from django.db.models import Count
-
 import json
 import datetime
 
@@ -236,17 +240,15 @@ class DateTimeEncoder(json.JSONEncoder):
             return obj.isoformat()
         return super(DateTimeEncoder, self).default(obj)
 
+from time import *
 def weiboSearchIndex(request):
+    start_time=time()
     print("request = ", request, "keyword = ", request.GET['keyword'], "method = ", request.method)
-    # print("id = ", request.GET['id'])
     res = {
         'status': 404,
         'text': 'Unknown request!'
     }
     if request.method == 'GET':
-        # name = request.GET['id']
-        # print("name = ", name)
-        # if name == 'weibosubmit2search':
         try:
             # Get the user's search query and split it into keywords
             user_keywords = jieba.cut(request.GET['keyword'], cut_all=False)
@@ -277,18 +279,8 @@ def weiboSearchIndex(request):
             docLst=sorted(doc_keyword_counts.items(), key=lambda x: x[1], reverse=True)
             print("docLst = ", docLst)
             idLst=[ i[0] for i in docLst ]
-            result=[]
-            # for id in idLst:
-            #     result_query = WeiboNotes.objects.get(id=id)
-            #     print("result_query = ", result_query)
-            #     result.append(result_query)
             result = list(WeiboNotes.objects.filter(id__in=idLst).values())
-            # print("result_query = ", result_query)
-            #
-            # results_dict = {obj[id] : obj for obj in result_query}
-            # print("results_dict = ", results_dict)
-            # result = [results_dict[id] for id in idLst if id in results_dict]
-            # print("result = ", result)
+            print(len(result), time()-start_time)
             if result:
                 res = {
                     'status': 200,
@@ -305,3 +297,6 @@ def weiboSearchIndex(request):
                 'text': 'No result!'
             }
     return HttpResponse(DateTimeEncoder().encode(res), content_type='application/json')
+
+
+

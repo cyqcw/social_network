@@ -1,6 +1,7 @@
 from django.contrib import admin
 from import_export import resources
-from movierecommendation.models import DoubanMovie, DoubanMovieIndex, WeiboComments, WeiboCommentIndex
+from movierecommendation.models import DoubanMovie, DoubanMovieIndex, WeiboComments, WeiboCommentIndex, WeiboNotes, \
+    WeiboNoteIndex
 from import_export.admin import ImportExportModelAdmin
 
 
@@ -61,5 +62,31 @@ class WeiboCommentIndexAdmin(ImportExportModelAdmin):
     list_display = ('comment_keyword', 'comment_doclist')
     search_fields = ('comment_keyword',)
     resource_class = WeiboCommentIndexResource
+
+
+class WeiboNotesResource(resources.ModelResource):
+    class Meta:
+        model = WeiboNotes
+        export_order = ('note_id', 'content', 'create_date_time', 'liked_count', 'comments_count', 'shared_count',
+        'ip_location','user_id', 'nickname', 'gender')
+
+@admin.register(WeiboNotes)
+class WeiboNotesAdmin(ImportExportModelAdmin):
+    list_display = (
+        'note_id', 'content', 'create_date_time', 'liked_count', 'comments_count', 'shared_count',
+        'ip_location','user_id', 'nickname', 'gender')
+    search_fields = ('content', 'nickname')
+    resource_class = WeiboNotesResource
+
+class WeiboNotesIndexResource(resources.ModelResource):
+    class Meta:
+        model = WeiboNoteIndex
+        export_order = ('note_keyword', 'note_doclist')
+
+@admin.register(WeiboNoteIndex)
+class WeiboNoteIndexAdmin(ImportExportModelAdmin):
+    list_display = ('note_keyword', 'note_doclist')
+    search_fields = ('note_keyword',)
+    resource_class = WeiboNotesIndexResource
 
 
