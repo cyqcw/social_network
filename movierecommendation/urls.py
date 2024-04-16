@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^searchindex', views.searchindex, name='searchIndex'),
 
     url(r'^wbbuildindex', views.weibobuildindex, name='weiboIndex'),
+    url(r'^wbsearchindex', views.weiboSearchIndex),
 ]

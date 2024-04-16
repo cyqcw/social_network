@@ -175,7 +175,11 @@ def weibobuildindex(request):
             note_set = dict()
             for note in note_list:
                 note_id = note['id']
-                text = note['content'] + note['nickname']
+                text = note['content']
+                if note['nickname'] != None:
+                    text += note['nickname']
+                if text == None:
+                    continue
                 print("text = ", text)
                 # 正则表达式去除非文字和数字的字符
                 note_text = re.sub(r'[^\w]+', '', text.strip())
@@ -233,68 +237,71 @@ class DateTimeEncoder(json.JSONEncoder):
         return super(DateTimeEncoder, self).default(obj)
 
 def weiboSearchIndex(request):
+    print("request = ", request, "keyword = ", request.GET['keyword'], "method = ", request.method)
+    # print("id = ", request.GET['id'])
     res = {
         'status': 404,
         'text': 'Unknown request!'
     }
     if request.method == 'GET':
-        name = request.GET['id']
-        if name == 'weibosubmit2search':
-            try:
-                # Get the user's search query and split it into keywords
-                user_keywords = jieba.cut(request.GET['keyword'], cut_all=False)
-                print("user_keywords = ", user_keywords)
-                # Get all keywords from the inverted index in the database
-                db_keywords = WeiboNoteIndex.objects.values_list('note_keyword', flat=True)
-                print("db_keywords = ", db_keywords)
-                relevant_keywords = []
-                # For each user keyword, calculate the similarity with all db keywords
-                for user_keyword in user_keywords:
-                    for db_keyword in db_keywords:
-                        if calculate_similarity(user_keyword, db_keyword) > 70:  # adjust threshold as needed
-                            relevant_keywords.append(db_keyword)
-                # Get the documents that contain the relevant keywords
-                print("relevant_keywords = ", relevant_keywords)
-                relevant_docs = WeiboNoteIndex.objects.filter(note_keyword__in=relevant_keywords)
-                print("relevant_docs = ", relevant_docs)
+        # name = request.GET['id']
+        # print("name = ", name)
+        # if name == 'weibosubmit2search':
+        try:
+            # Get the user's search query and split it into keywords
+            user_keywords = jieba.cut(request.GET['keyword'], cut_all=False)
+            print("user_keywords = ", user_keywords)
+            # Get all keywords from the inverted index in the database
+            db_keywords = WeiboNoteIndex.objects.values_list('note_keyword', flat=True)
+            # print("db_keywords = ", db_keywords)
+            relevant_keywords = []
+            # For each user keyword, calculate the similarity with all db keywords
+            for user_keyword in user_keywords:
+                for db_keyword in db_keywords:
+                    if calculate_similarity(user_keyword, db_keyword) > 70:  # adjust threshold as needed
+                        relevant_keywords.append(db_keyword)
+            # Get the documents that contain the relevant keywords
+            print("relevant_keywords = ", relevant_keywords)
+            relevant_docs = WeiboNoteIndex.objects.filter(note_keyword__in=relevant_keywords)
+            print("relevant_docs = ", relevant_docs)
 
-                # Count the number of times each keyword appears in each document
-                doc_keyword_counts = {}
-                for doc in relevant_docs:
-                    doc_keywords = json.loads(doc.note_doclist)
-                    for keyword in doc_keywords:
-                        if keyword not in doc_keyword_counts:
-                            doc_keyword_counts[keyword] = 1
-                        else:
-                            doc_keyword_counts[keyword] += 1
-                docLst=sorted(doc_keyword_counts.items(), key=lambda x: x[1], reverse=True)
-                print("docLst = ", docLst)
-                idLst=[ i[0] for i in docLst ]
-                result=[]
-                # for id in idLst:
-                #     result_query = WeiboNotes.objects.get(id=id)
-                #     print("result_query = ", result_query)
-                #     result.append(result_query)
-                result = list(WeiboNotes.objects.filter(id__in=idLst).values())
-                # print("result_query = ", result_query)
-                #
-                # results_dict = {obj[id] : obj for obj in result_query}
-                # print("results_dict = ", results_dict)
-                # result = [results_dict[id] for id in idLst if id in results_dict]
-                print("result = ", result)
-                if result:
-                    res = {
-                        'status': 200,
-                        'text': result
-                    }
-                else:
-                    res = {
-                        'status': 201,
-                        'text': 'No result!'
-                    }
-            except ObjectDoesNotExist:
+            # Count the number of times each keyword appears in each document
+            doc_keyword_counts = {}
+            for doc in relevant_docs:
+                doc_keywords = json.loads(doc.note_doclist)
+                for keyword in doc_keywords:
+                    if keyword not in doc_keyword_counts:
+                        doc_keyword_counts[keyword] = 1
+                    else:
+                        doc_keyword_counts[keyword] += 1
+            docLst=sorted(doc_keyword_counts.items(), key=lambda x: x[1], reverse=True)
+            print("docLst = ", docLst)
+            idLst=[ i[0] for i in docLst ]
+            result=[]
+            # for id in idLst:
+            #     result_query = WeiboNotes.objects.get(id=id)
+            #     print("result_query = ", result_query)
+            #     result.append(result_query)
+            result = list(WeiboNotes.objects.filter(id__in=idLst).values())
+            # print("result_query = ", result_query)
+            #
+            # results_dict = {obj[id] : obj for obj in result_query}
+            # print("results_dict = ", results_dict)
+            # result = [results_dict[id] for id in idLst if id in results_dict]
+            # print("result = ", result)
+            if result:
+                res = {
+                    'status': 200,
+                    'text': result
+                }
+            else:
                 res = {
                     'status': 201,
                     'text': 'No result!'
                 }
+        except ObjectDoesNotExist:
+            res = {
+                'status': 201,
+                'text': 'No result!'
+            }
     return HttpResponse(DateTimeEncoder().encode(res), content_type='application/json')

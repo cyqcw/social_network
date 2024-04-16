@@ -51,6 +51,7 @@ $(document).ready(function(){
             },  
             success: function(result){
                 if(result.status == 200){
+                    console.log("old get")
                     var movie_list = result.text;
                     var movie_oldlist = $("tr.movie-entry");
                     if (movie_oldlist && movie_oldlist.length>0) {
@@ -113,7 +114,7 @@ $(document).ready(function(){
 
     // 点击微博检索按钮，发请求
     $("#btn-weibosubmit2search").on("click", function () {
-        var keyword = $.trim($('input[name="submit2search"]').val());
+        const keyword = $.trim($('input[name="weibosubmit2search"]').val());
         if (keyword == "")
             return;
         $.ajax({
@@ -132,25 +133,30 @@ $(document).ready(function(){
                 // 请求完成移除 disabled 属性
                 $("#btn-weibosubmit2search").removeAttr("disabled");
             },
+
             success: function(result){
+                console.log("new get");
                 if(result.status == 200){
                     var note_list = result.text;
-                    var note_oldlist = $("tr.movie-entry");
+                    console.log("note_list", note_list)
+                    var note_oldlist = $("tr.note-entry");
+                    console.log("note_oldlist", note_oldlist)
                     if (note_oldlist && note_oldlist.length>0) {
                         // 清空原有表格
-                        $("tr.movie-entry").remove();
+                        $("tr.note-entry").remove();
                         $("ul.pagination").remove();
                     }
                     // 创建搜索结果的表格并插入到前端页面
                     for (var i = 0; i < note_list.length; i++) {
-                        var search_html = '<tr class="movie-entry">'
+                        var search_html = '<tr class="note-entry">'
                         + '<td>' + note_list[i].id + '</td>'
-                        + '<td>' + note_list[i].movie_title + '</td>'
-                        + '<td>' + note_list[i].movie_directors + '</td>'
-                        + '<td>' + note_list[i].movie_actors + '</td>'
-                        + '<td>' + note_list[i].movie_description + '</td>'
+                        + '<td>' + note_list[i].content + '</td>'
+                        + '<td>' + note_list[i].create_date_time + '</td>'
+                        + '<td>' + note_list[i].nickname + '</td>'
+                        + '<td>' + note_list[i].ip_location + '</td>'
+                        + '<td>' + note_list[i].gender + '</td>'
                         + '</tr>';
-                        $("table#moview-result-list-table").append($(search_html))
+                        $("table#note-result-list-table").append($(search_html))
                     }
                     console.log("检索成功");
                 }else if(result.status == 201){

@@ -28,7 +28,7 @@ urlpatterns = [
     url(r'^buildindex', include('movierecommendation.urls')),
 
     url(r'^admin', admin.site.urls),
-    url(r'^$', views.doubanRecommendation),
+    url(r'^$', views.weiboRecommendation),
 
     url(r'^buildindex', views.buildindex),
     url(r'^searchindex', views.searchindex),

@@ -12,11 +12,11 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center my-4">微博评论</h1>
-        <form id="myformsearch" action="" method="get" class="form-inline" role="form">
+        <h1 class="text-center my-4">微博数据分析</h1>
+        <form id="weiboformsearch" action="" method="get" class="form-inline" role="form">
             {# 检索框 #}
             <div class="form-group mb-2">
-                <input id="submit2search" name="submit2search" type="search" placeholder="检索" value="" class="form-control">
+                <input id="weibosubmit2search" name="weibosubmit2search" type="search" placeholder="检索" value="" class="form-control">
             </div>
             {# 检索按钮 #}
             <div class="form-group mx-sm-3 mb-2">
@@ -24,7 +24,7 @@
             </div>
 
         </form>
-        <form id="myform" action="" method="post" class="form-inline" role="form">
+        <form id="weiboform" action="" method="post" class="form-inline" role="form">
             {# 建立索引按钮 #}
             <div class="form-group mb-2">
                 <input id="weibosubmit2index" name="weibosubmit2index" type="button" class="form-control btn btn-success" value="新建索引">
@@ -44,7 +44,7 @@
                 </thead>
                 <tbody>
                     {% for data in data_list %}
-                        <tr class="comment-entry" id="{{ data.id }}">
+                        <tr class="note-entry" id="{{ data.id }}">
                             <td>{{ data.id }}</td>
                             <td>{{ data.content }}</td>
                             <td>{{ data.create_date_time }}</td>
