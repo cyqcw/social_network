@@ -36,6 +36,8 @@ urlpatterns = [
     url(r'^wbbuildindex', include('movierecommendation.urls')),
     url(r'^wbsearchindex', views.weiboSearchIndex),
     url(r'^wbsearchindex', include('movierecommendation.urls')),
+
+    url(r'^posannotation', views.posannotation)
 ]
 urlpatterns += staticfiles_urlpatterns()
 

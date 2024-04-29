@@ -10,4 +10,6 @@ urlpatterns = [
 
     url(r'^wbbuildindex', views.weibobuildindex, name='weiboIndex'),
     url(r'^wbsearchindex', views.weiboSearchIndex),
+
+    url(r'^posannotation', views.posannotation, name='posAnnotation')
 ]

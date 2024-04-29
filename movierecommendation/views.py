@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from movierecommendation.models import DoubanMovie, DoubanMovieIndex, WeiboNotes, WeiboNoteIndex
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import jieba
@@ -129,7 +129,7 @@ def searchindex(request):
     return HttpResponse(json.dumps(res), content_type='application/json')
 
 
-# 定义微博评论页面
+# 定义微博页面
 def weiboRecommendation(request):
     note_list = WeiboNotes.objects.all().order_by('id')  # 取出WeiboNotes表所有数据并排序
     paginator = Paginator(note_list, 20)  # 3是每页显示的数量，把数据库取出的数据生成paginator对象，并指定每页显示的数量
@@ -299,4 +299,70 @@ def weiboSearchIndex(request):
     return HttpResponse(DateTimeEncoder().encode(res), content_type='application/json')
 
 
+
+
+# 词性标注
+import jieba
+import jieba.posseg as psg
+
+# 扩展词性到颜色的映射
+color_map = {
+    'n': 'yellow',    # 名词
+    'v': 'green',     # 动词
+    'a': 'lightblue', # 形容词
+    'ad': 'orange',  # 副词
+    'r': 'purple',   # 代词
+    'ns': 'pink',    # 地名
+}
+
+# 定义词性标注请求链接
+@csrf_exempt
+def posannotation(request):
+    if request.method == 'GET':
+        print("request = ", request, "id = ", request.GET.get('id'))
+
+        # 获取请求参数
+        note_id = request.GET.get('id')
+        if note_id:
+            try:
+                # 从数据库中获取微博数据
+                weibo_note = WeiboNotes.objects.get(id=note_id)
+                original_content = weibo_note.content
+
+                # 进行词性标注
+                seg_list = psg.cut(original_content)
+
+                # 构建标注后的HTML文本
+                annotated_text = ''
+                for word, flag in seg_list:
+                    if flag in color_map:
+                        annotated_text += f'<span style="background-color: {color_map[flag]};">{word}</span>'
+                    else:
+                        annotated_text += word
+                # 准备响应数据
+                response_data = {
+                    'id': note_id,
+                    'content': annotated_text,
+                    'create_date_time': weibo_note.create_date_time,
+                    'nickname': weibo_note.nickname,
+                    'gender': weibo_note.gender,
+                }
+
+                res = {
+                    'status': 200,
+                    'data': response_data
+                }
+            except WeiboNotes.DoesNotExist:
+                res = {
+                    'status': 404,
+                    'data': 'Note not found!'
+                }
+        else:
+            res = { 'status': 400, 'data': 'Invalid request, missing note ID.' }
+    else:
+        res = {
+            'status': 405,
+            'data': 'Method Not Allowed'
+        }
+    return JsonResponse(res)
 

@@ -40,6 +40,7 @@
                         <th>昵称</th>
                         <th>地址</th>
                         <th>性别</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,8 +50,9 @@
                             <td>{{ data.content }}</td>
                             <td>{{ data.create_date_time }}</td>
                             <td>{{ data.nickname }}</td>
-                            <td>{{ data.ip_location }}</td>
+                            <td>{{ data.location }}</td>
                             <td>{{ data.gender }}</td>
+                            <td><input type="button" id="{{ data.id }}" class="btn btn-success btn-pos" value="词性标注"></td>
                         </tr>
                     {% endfor %}
                 </tbody>
