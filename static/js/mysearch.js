@@ -174,10 +174,8 @@ $(document).ready(
         })
 
         $("input.btn-pos").on("click", function () {
-            alert("点击事件触发了！");
             // 保存按钮的引用
             var $button = $(this);
-            console.log("词性标注");
             // 发送AJAX请求
             $.ajax({
                 type: "GET",
@@ -187,7 +185,6 @@ $(document).ready(
                 },
                 dataType: "json",
                 beforeSend: function() {
-                    console.log("词性标注11------");
                     // 禁用按钮
                     $button.attr("disabled", "disabled");
                 },
@@ -218,7 +215,6 @@ $(document).ready(
                 }
             });
         });
-
 })
 
 // $(document).on(

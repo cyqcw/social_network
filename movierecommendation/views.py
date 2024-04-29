@@ -309,9 +309,9 @@ import jieba.posseg as psg
 color_map = {
     'n': 'yellow',    # 名词
     'v': 'green',     # 动词
-    'a': 'lightblue', # 形容词
+    'a': 'grey',     # 形容词
     'ad': 'orange',  # 副词
-    'r': 'purple',   # 代词
+    'r': 'white',   # 代词
     'ns': 'pink',    # 地名
 }
 
@@ -319,8 +319,7 @@ color_map = {
 @csrf_exempt
 def posannotation(request):
     if request.method == 'GET':
-        print("request = ", request, "id = ", request.GET.get('id'))
-
+        print("keyword = ", request.GET['id'], "method = ", request.method)
         # 获取请求参数
         note_id = request.GET.get('id')
         if note_id:
@@ -345,6 +344,7 @@ def posannotation(request):
                     'content': annotated_text,
                     'create_date_time': weibo_note.create_date_time,
                     'nickname': weibo_note.nickname,
+                    'ip_location': weibo_note.ip_location,
                     'gender': weibo_note.gender,
                 }
 
