@@ -52,7 +52,10 @@
                             <td>{{ data.nickname }}</td>
                             <td>{{ data.ip_location }}</td>
                             <td>{{ data.gender }}</td>
-                            <td><input type="button" id="{{data.id}}" class="btn btn-success btn-pos" value="词性标注"></td>
+                            <td>
+                                <input type="button" id="{{data.id}}" class="btn btn-success btn-pos" value="词性标注">
+                                <input type="button" id="{{data.id}}" class="btn btn-success btn-ner" value="命名实体识别">
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

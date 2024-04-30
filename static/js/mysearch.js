@@ -202,7 +202,10 @@ $(document).ready(
                             + '<td>' + note.nickname + '</td>'
                             + '<td>' + note.ip_location + '</td>'
                             + '<td>' + note.gender + '</td>'
-                            + '<td><input type="button" class="form-control btn btn-success btn-pos" value="词性标注" id="{{ data.id }}"></td>'
+                            + '<td>'
+                                + '<input type="button" class="form-control btn btn-success btn-pos" value="词性标注" id="{{ data.id }}">'
+                                + '<input type="button" class="form-control btn btn-success btn-ner" value="命名实体识别" id="{{ data.id }}">'
+                            + '</td>'
                             + '</tr>';
                         $("tr.note-entry#"+note.id).replaceWith(replace_html);
                     }
@@ -214,6 +217,52 @@ $(document).ready(
                     alert("词性标注提交异常：" + errorThrown);
                 }
             });
+        });
+
+        $("input.btn-ner").on("click", function () {
+            // 保存按钮的引用
+            var $button = $(this);
+            // 发送AJAX请求
+            $.ajax({
+                type: "GET",
+                url: "/nerannotation",
+                data: {
+                    "id": $button.attr("id") // 使用保存的引用
+                },
+                dataType: "json",
+                beforeSend: function() {
+                    // 禁用按钮
+                    $button.attr("disabled", "disabled");
+                },
+                complete: function () {
+                    // 请求完成后启用按钮
+                    $button.removeAttr("disabled");
+                },
+                success: function(result) {
+                    if (result.status == 200) {
+                        var note = result.data;
+                        var replace_html = '<tr class="note-entry" id=' + note.id + '>'
+                            + '<td>' + note.id + '</td>'
+                            + '<td>' + note.content + '</td>'
+                            + '<td>' + note.create_date_time + '</td>'
+                            + '<td>' + note.nickname + '</td>'
+                            + '<td>' + note.ip_location + '</td>'
+                            + '<td>' + note.gender + '</td>'
+                            + '<td>'
+                                + '<input type="button" class="form-control btn btn-success btn-pos" value="词性标注" id="{{ data.id }}">'
+                                + '<input type="button" class="form-control btn btn-success btn-ner" value="命名实体识别" id="{{ data.id }}">'
+                            + '</td>'
+                            + '</td>'
+                            + '</tr>';
+                        $("tr.note-entry#" + note.id).replaceWith(replace_html);
+                    } else {
+                        alert("命名实体识别失败");
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert("命名实体提交异常：" + errorThrown);
+                }
+            })
         });
 })
 

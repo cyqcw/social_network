@@ -1,5 +1,10 @@
+import base64
+from io import BytesIO
+
 from django.shortcuts import render
 from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
+from sklearn.decomposition import PCA
+
 from movierecommendation.models import DoubanMovie, DoubanMovieIndex, WeiboNotes, WeiboNoteIndex
 from django.http import HttpResponse, JsonResponse
 import json
@@ -328,13 +333,20 @@ def posannotation(request):
                 weibo_note = WeiboNotes.objects.get(id=note_id)
                 original_content = weibo_note.content
 
+                # 读出停用词
+                stopwords = []
+                static_filepath = os.path.join(settings.STATIC_ROOT, 'refs')
+                file_path = os.path.join(static_filepath, 'stopwords.txt')
+                for word in open(file_path, encoding='utf-8'):
+                    stopwords.append(word.strip())
+
                 # 进行词性标注
                 seg_list = psg.cut(original_content)
 
                 # 构建标注后的HTML文本
                 annotated_text = ''
                 for word, flag in seg_list:
-                    if flag in color_map:
+                    if flag in color_map and word not in stopwords:
                         annotated_text += f'<span style="background-color: {color_map[flag]};">{word}</span>'
                     else:
                         annotated_text += word
@@ -365,4 +377,176 @@ def posannotation(request):
             'data': 'Method Not Allowed'
         }
     return JsonResponse(res)
+
+
+import spacy
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import os
+
+# 加载spacy模型，这里假设使用了jieba插件，但具体可能需要根据实际安装的模型调整
+nlp = spacy.load('zh_core_web_sm')
+
+# 定义颜色映射，根据实体类型设定字体颜色
+text_color_map = {
+    'PER': 'red',  # 人名
+    'LOC': 'blue',  # 地名
+    'ORG': 'green',  # 机构名
+}
+
+@csrf_exempt
+def nerannotation(request):
+    if request.method == 'GET':
+        note_id = request.GET.get('id')
+        if note_id:
+            try:
+                weibo_note = WeiboNotes.objects.get(id=note_id)
+                original_content = weibo_note.content
+                # 使用spacy进行实体识别
+                doc = nlp(original_content)
+
+                # 构建标注后的HTML文本
+                annotated_text = original_content
+                for ent in doc.ents:
+                    # 使用CSS样式更改字体颜色
+                    annotated_text = annotated_text.replace(
+                        str(ent),
+                        f'<span style="color: {text_color_map.get(ent.label_, "black")};">{str(ent)}</span>'
+                    )
+
+                response_data = {
+                    'id': note_id,
+                    'content': annotated_text,
+                    'create_date_time': weibo_note.create_date_time,
+                    'nickname': weibo_note.nickname,
+                    'ip_location': weibo_note.ip_location,
+                    'gender': weibo_note.gender,
+                }
+
+                res = {
+                    'status': 200,
+                    'data': response_data
+                }
+            except WeiboNotes.DoesNotExist:
+                res = {
+                    'status': 404,
+                    'data': 'Note not found!'
+                }
+        else:
+            res = {'status': 400, 'data': 'Invalid request, missing note ID.'}
+    else:
+        res = {
+            'status': 405,
+            'data': 'Method Not Allowed'
+        }
+    return JsonResponse(res)
+
+
+
+
+
+#加载Python库
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import jieba.analyse
+
+# 定义挖掘页面.
+def doubanClassification(request):
+    # 数据预处理
+    # 获取所有电影的文本并进行中文分词与预处理
+    movie_list = DoubanMovie.objects.values('id', 'movie_title', 'movie_description')
+    movie_set = []
+    for movie in movie_list:
+        text = movie['movie_title'] + movie['movie_description']
+        # 正则表达式去除非文字和数字的字符
+        movie_text = re.sub(r'[^\w]+', '', text.strip())
+        movie_set.append(movie_text)
+
+    # 初始化停用词列表
+    # 注意：从网上下载一个较为全面完整的stopwords.txt用于本次任务。此处只是一个简单的示例文件
+    stopwords = []
+    static_filepath = os.path.join(settings.STATIC_ROOT, 'refs')
+    file_path = os.path.join(static_filepath, 'stopwords.txt')
+    for word in open(file_path, encoding='utf-8'):
+        stopwords.append(word.strip())
+
+    # 定义分词函数
+    def tokenizer(s):
+        words = []
+        cut = jieba.cut(s)
+        for word in cut:
+            words.append(word)
+        return words
+
+    # 创建一个向量计数器对象
+    count = CountVectorizer(tokenizer=tokenizer, stop_words=list(stopwords))
+    countvector = count.fit_transform(movie_set).toarray()
+
+    # 此处的主成分维度我们人为设定为2，对于属性较少的数据集，属于常规会选择的维度数，后面也会看到，这个也是出于可以可视化的需求
+    new_pca = PCA(n_components=2)
+    # 将设置了维数的模型作用到标准化后的数据集并输出查看
+    X = new_pca.fit_transform(countvector)
+
+    # K-means聚类建模
+    # 运行KMeans聚类算法
+    # 此处指定K=3
+    estimator = KMeans(n_clusters=3)
+    estimator.fit(X)
+    # 获取聚类标签
+    label_pred = estimator.labels_
+
+    #绘制k-means结果
+    plt.switch_backend('Agg')
+    x0 = X[label_pred == 0]
+    x1 = X[label_pred == 1]
+    x2 = X[label_pred == 2]
+    plt.scatter(x0[:, 0], x0[:, 1], c = "red", marker='o', label='label0')
+    plt.scatter(x1[:, 0], x1[:, 1], c = "green", marker='*', label='label1')
+    plt.scatter(x2[:, 0], x2[:, 1], c = "blue", marker='+', label='label2')
+    plt.legend(loc=2)
+    plt.title("KMeans聚类结果显示")
+    sio = BytesIO()
+    plt.savefig(sio, format='png', bbox_inches='tight', pad_inches=0.0)
+    data = base64.encodebytes(sio.getvalue()).decode()
+    src = 'data:image/png;base64,'+str(data)
+    plt.close()
+
+    clusters = ' '.join(movie_set)
+    # 提取clusters的主题关键词
+    kw1 = jieba.analyse.textrank(clusters, topK=50, withWeight=True, allowPOS=('ns', 'n'))
+    words_frequence = {x[0]: x[1] for x in kw1}
+    file_bg_path = os.path.join(static_filepath, 'cat.jpg')
+    backgroud_Image = plt.imread(file_bg_path)
+    # 若是有中文的话，font_path必须添加，不然会出现乱码，不出现汉字
+    # simsun.ttc为汉字编码文件，可以从本地windows系统找一个汉字编码文件上传， 如C:\\Windows\Fonts下有许多汉字编码文件
+    file_font_path = os.path.join(static_filepath, 'simsun.ttc')
+    wordcloud = WordCloud(font_path=file_font_path, mask=backgroud_Image, repeat=True, background_color='white')
+    wordcloud = wordcloud.fit_words(words_frequence)
+    plt.imshow(wordcloud)
+    plt.axis("off")
+    sio = BytesIO()
+    plt.savefig(sio, format='png', bbox_inches='tight', pad_inches=0.0)
+    cloud_data = base64.encodebytes(sio.getvalue()).decode()
+    cloud_src = 'data:image/png;base64,' + str(cloud_data)
+    plt.close()
+
+    # 保持图片，其他结果图也可以参照此方法先保存图片，再从前端读取图片路径进行显示
+    file_img_path = os.path.join(static_filepath, 'wordcloudcluster.jpg')
+    wordcloud.to_file(file_img_path)
+
+    image_list = []
+    image_list.append(cloud_src)
+
+    # image_list: 聚类结果每一类的词云图
+    return render(request, 'doubanClassification.html', {
+            'image_cluters': src,
+            'cluster_list': image_list
+        })
+
+
+
+
+
 

@@ -22,8 +22,11 @@ from movierecommendation import views
 urlpatterns = [
     url(r'^movie', include('movierecommendation.urls')),
     url(r'^weibo', include('movierecommendation.urls')),
+    url(r'image', include('movierecommendation.urls')),
+
     url(r'^movie', views.doubanRecommendation),
     url(r'^weibo', views.weiboRecommendation),
+    url(r'^image', views.doubanClassification),
 
     url(r'^buildindex', include('movierecommendation.urls')),
 
@@ -37,7 +40,9 @@ urlpatterns = [
     url(r'^wbsearchindex', views.weiboSearchIndex),
     url(r'^wbsearchindex', include('movierecommendation.urls')),
 
-    url(r'^posannotation', views.posannotation)
+    url(r'^posannotation', views.posannotation),
+
+    url(r'^nerannotation', views.nerannotation),
 ]
 urlpatterns += staticfiles_urlpatterns()
 

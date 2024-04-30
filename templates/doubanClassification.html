@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>社交网络</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="{% static 'js/mysearch.js' %}"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>豆瓣电影聚类结果</h1>
+        <img src="{{ image_cluters }}">
+        <p>聚类结果每一类的词云图如下： </p>
+        {% for cluster_image in cluster_list %}
+            <img src="{{ cluster_image }}">
+        {% endfor %}
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>
