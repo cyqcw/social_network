@@ -556,6 +556,38 @@ def questionAnswer(request):
 
 
 
+
+# 阿里云大模型示例
+import random
+from http import HTTPStatus
+import dashscope
+from dashscope import Generation
+def call_stream_with_messages(question):
+    dashscope.api_key = 'sk-Re29MpP6Lg'
+    messages = [
+        {'role': 'user', 'content': question}
+    ]
+    responses = Generation.call(
+        'qwen1.5-110b-chat',
+        messages=messages,
+        seed=random.randint(1,1000),  # set the random seed, optional, default to 1234 if not set
+        result_format='message',  # set the result to be "message"  format.
+        stream=True,
+        output_in_full=False  # get streaming output incrementally
+    )
+    full_content = ''
+    for response in responses:
+        if response.status_code == HTTPStatus.OK:
+            full_content += response.output.choices[0]['message']['content']
+            # print(response)
+        else:
+            print('Request id: %s, Status code: %s, error code: %s, error message: %s' % (
+                response.request_id, response.status_code,
+                response.code, response.message
+            ))
+    print('Full content: \n' + full_content)
+    return full_content
+
 # 定义问答检索请求链接.
 @csrf_exempt
 def searchanswer(request):
@@ -567,21 +599,32 @@ def searchanswer(request):
         name = request.GET['id']
         if name == 'chatbotsendbtn':
             try:
-                 # 获取前端的问题文本
-                 text = request.GET['text']
-                 # 检索问题，匹配答案
-                 # 精确检索太苛刻了，如何实现近似问题检索？
-                 qa_rec = QuestionAnswer.objects.get(question=text)
-                 if qa_rec:
-                    res = {
-                        'status': 200,
-                        'answer': qa_rec.answer
-                    }
-                 else:
-                    res = {
-                        'status': 201,
-                        'answer': 'No answer!'
-                    }
+                # 获取前端的问题文本
+                text = request.GET['text']
+                print(f'text = {text}')
+                # 检索问题，匹配答案
+                # 从数据库中获取所有问题
+                questionAnswers = list(QuestionAnswer.objects.all())
+                # 计算问题和数据库中所有问题的相似度
+                most_similar_question = None
+                most_similar = 0
+                for qa in questionAnswers:
+                    qa_question = qa.question
+                    similarity = fuzz.ratio(text, qa_question)
+                    if similarity > most_similar:
+                        most_similar = similarity
+                        most_similar_question = qa
+                        print(f'similarity = {similarity}')
+                # 找到最相似的问题索引
+                answer = f'知乎: <br><br>问题: {most_similar_question.question}<br>回答: {most_similar_question.answer}'
+
+                # ai回答
+                ai_answer = f'阿里AI: <br><br>{call_stream_with_messages(text)}'
+
+                res = {
+                    'status': 200,
+                    'answer': [answer,ai_answer]
+                }
             except ObjectDoesNotExist:
                 res = {
                     'status': 201,

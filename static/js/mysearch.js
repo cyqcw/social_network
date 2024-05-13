@@ -311,11 +311,18 @@ $(document).ready(
                         var answer_html = `
                             <div class="item item-left">
                                 <div class="avatar avatar-bot"></div>
-                                <div class="bubble bubble-left">${result.answer}</div>
+                                <div class="bubble bubble-left">${result.answer[0]}</div>
                             </div>
                         `;
                         $('.content').append(answer_html);
 
+                        var answer_html = `
+                            <div class="item item-left">
+                                <div class="avatar avatar-bot"></div>
+                                <div class="bubble bubble-left">${result.answer[1]}</div>
+                            </div>
+                        `;
+                        $('.content').append(answer_html);
                         // 滚动条置底
                         $(".content").scrollTop($('.content').scrollTop());
                         console.log("检索答案成功");
