@@ -14,5 +14,9 @@ urlpatterns = [
 
     url(r'^posannotation', views.posannotation, name='posAnnotation'),
 
-    url(r'nerannotation', views.nerannotation, name='nerAnnotation')
+    url(r'nerannotation', views.nerannotation, name='nerAnnotation'),
+
+    url(r'questionanswer', views.questionAnswer, name='questionAnswer'),
+    #添加路由
+    url(r'^searchanswer', views.searchanswer, name= 'searchAnswer')
 ]

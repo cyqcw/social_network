@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export import resources
 from movierecommendation.models import DoubanMovie, DoubanMovieIndex, WeiboComments, WeiboCommentIndex, WeiboNotes, \
-    WeiboNoteIndex
+    WeiboNoteIndex, QuestionAnswer
 from import_export.admin import ImportExportModelAdmin
 
 
@@ -89,4 +89,15 @@ class WeiboNoteIndexAdmin(ImportExportModelAdmin):
     search_fields = ('note_keyword',)
     resource_class = WeiboNotesIndexResource
 
+
+class QuestionAnswerResource(resources.ModelResource):
+    class Meta:
+        model = QuestionAnswer
+        export_order = ('question', 'answer')
+
+@admin.register(QuestionAnswer)
+class WeiboCommentsAdmin(ImportExportModelAdmin):
+    list_display = ('question', 'answer')
+    search_fields = ('question', 'answer')
+    resource_class = QuestionAnswerResource
 

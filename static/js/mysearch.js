@@ -264,52 +264,79 @@ $(document).ready(
                 }
             })
         });
-})
 
-// $(document).on(
-//     $("input.btn-pos").on("click", function () {
-//         alert("点击事件触发了！");
-//         // 保存按钮的引用
-//         var $button = $(this);
-//         console.log("词性标注");
-//         // 发送AJAX请求
-//         $.ajax({
-//             type: "GET",
-//             url: "/posannotation",
-//             data: {
-//                 "id": $button.attr("id") // 使用保存的引用
-//             },
-//             dataType: "json",
-//             beforeSend: function() {
-//                 console.log("词性标注11------");
-//                 // 禁用按钮
-//                 $button.attr("disabled", "disabled");
-//             },
-//             complete: function () {
-//                 // 请求完成后启用按钮
-//                 $button.removeAttr("disabled");
-//             },
-//             success: function(result){
-//                 if(result.status == 200){
-//                     var note = result.data;
-//                     var replace_html = '<tr class="note-entry" id=' + note.id + '>'
-//                         + '<td>' + note.id + '</td>'
-//                         + '<td>' + note.content + '</td>'
-//                         + '<td>' + note.create_date_time + '</td>'
-//                         + '<td>' + note.nickname + '</td>'
-//                         + '<td>' + note.ip_location + '</td>'
-//                         + '<td>' + note.gender + '</td>'
-//                         + '<td><input type="button" class="form-control btn btn-success btn-pos" value="词性标注" id="{{ data.id }}"></td>'
-//                         + '</tr>';
-//                     $("tr.note-entry#"+note.id).replaceWith(replace_html);
-//                 }
-//                 else {
-//                     alert("词性标注失败");
-//                 }
-//             },
-//             error: function (jqXHR, textStatus, errorThrown) {
-//                 alert("词性标注提交异常：" + errorThrown);
-//             }
-//         })
-//     })
-// );
+        // 点击检索按钮，发请求chatbotsendbtn
+        $("#chatbotsendbtn").on("click", function () {
+            var searchtext = $.trim($('#chattextarea').val());
+            if (searchtext === "") {
+                alert("请输入您的问题");
+                return;
+            }
+            console.log("searchtext ：", searchtext);
+            // 将问题添加到聊天窗口的末尾
+            var question_html = `
+                <div class="item item-right">
+                    <div class="bubble bubble-right">${searchtext}</div>
+                    <div class="avatar avatar-user"></div>
+                </div>
+            `;
+            $('.content').append(question_html);
+
+            // 清空问题文本框
+            $('#chattextarea').val('').focus();
+
+            // 滚动条置底
+            var height = $('.content').scrollTop();
+            $(".content").scrollTop(height);
+
+            $.ajax({
+                type: "get",
+                url: "/searchanswer",
+                data: {
+                    "id": $("#chatbotsendbtn").attr("id"),
+                    "text": searchtext
+                },
+                dataType: "json",
+                beforeSend: function() {
+                    // 设置 disabled 阻止用户继续点击
+                    $("#chatbotsendbtn").attr("disabled", "disabled");
+                },
+                complete: function () {
+                    // 请求完成移除 disabled 属性
+                    $("#chatbotsendbtn").removeAttr("disabled");
+                },
+                success: function(result) {
+                    if (result.status === 200) {
+                        // 将答案添加到聊天窗口的末尾
+                        var answer_html = `
+                            <div class="item item-left">
+                                <div class="avatar avatar-bot"></div>
+                                <div class="bubble bubble-left">${result.answer}</div>
+                            </div>
+                        `;
+                        $('.content').append(answer_html);
+
+                        // 滚动条置底
+                        $(".content").scrollTop($('.content').scrollTop());
+                        console.log("检索答案成功");
+                    } else {
+                        // 将答案添加到聊天窗口的末尾
+                        var answer_html = `
+                            <div class="item item-left">
+                                <div class="avatar avatar-bot"></div>
+                                <div class="bubble bubble-left">对不起！我不明白您的问题，可以换种问法吗？</div>
+                            </div>
+                        `;
+                        $('.content').append(answer_html);
+
+                        // 滚动条置底
+                        $(".content").scrollTop($('.content').scrollTop());
+                        console.log("检索不到答案");
+                    }
+                },
+                error: function(jqXHR, textStatus, e) {
+                    alert("提交异常：" + e);
+                }
+            });
+        });
+})

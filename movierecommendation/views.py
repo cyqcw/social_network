@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from sklearn.decomposition import PCA
 
-from movierecommendation.models import DoubanMovie, DoubanMovieIndex, WeiboNotes, WeiboNoteIndex
+from movierecommendation.models import DoubanMovie, DoubanMovieIndex, WeiboNotes, WeiboNoteIndex, QuestionAnswer
 from django.http import HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -550,3 +550,41 @@ def doubanClassification(request):
 
 
 
+# 定义问答系统页面
+def questionAnswer(request):
+    return render(request, 'questionAnswer.html')
+
+
+
+# 定义问答检索请求链接.
+@csrf_exempt
+def searchanswer(request):
+    res = {
+     'status': 404,
+     'text': 'Unknown request!'
+    }
+    if request.method == 'GET':
+        name = request.GET['id']
+        if name == 'chatbotsendbtn':
+            try:
+                 # 获取前端的问题文本
+                 text = request.GET['text']
+                 # 检索问题，匹配答案
+                 # 精确检索太苛刻了，如何实现近似问题检索？
+                 qa_rec = QuestionAnswer.objects.get(question=text)
+                 if qa_rec:
+                    res = {
+                        'status': 200,
+                        'answer': qa_rec.answer
+                    }
+                 else:
+                    res = {
+                        'status': 201,
+                        'answer': 'No answer!'
+                    }
+            except ObjectDoesNotExist:
+                res = {
+                    'status': 201,
+                    'answer': 'No answer!'
+                }
+        return HttpResponse(json.dumps(res), content_type='application/json')

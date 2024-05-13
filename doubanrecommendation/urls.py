@@ -43,6 +43,13 @@ urlpatterns = [
     url(r'^posannotation', views.posannotation),
 
     url(r'^nerannotation', views.nerannotation),
+
+    # 问答系统
+    url(r'questionanswer', views.questionAnswer, name='questionAnswer'),
+    url(r'questionanswer', include('movierecommendation.urls')),
+    #添加路由
+    url(r'^searchanswer', views.searchanswer)
+
 ]
 urlpatterns += staticfiles_urlpatterns()
 
