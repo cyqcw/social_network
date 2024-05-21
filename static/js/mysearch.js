@@ -173,6 +173,7 @@ $(document).ready(
             });
         })
 
+        // 点击微博词性标注按钮，发请求
         $("input.btn-pos").on("click", function () {
             // 保存按钮的引用
             var $button = $(this);
@@ -219,6 +220,7 @@ $(document).ready(
             });
         });
 
+        // 点击微博命名实体识别按钮，发请求
         $("input.btn-ner").on("click", function () {
             // 保存按钮的引用
             var $button = $(this);
@@ -265,7 +267,7 @@ $(document).ready(
             })
         });
 
-        // 点击检索按钮，发请求chatbotsendbtn
+        // 大模型对话点击检索按钮，发请求chatbotsendbtn
         $("#chatbotsendbtn").on("click", function () {
             var searchtext = $.trim($('#chattextarea').val());
             if (searchtext === "") {
@@ -346,4 +348,45 @@ $(document).ready(
                 }
             });
         });
+
+        // 点击微博推荐按钮，发请求
+        $("input.btn-rec").on("click", function () {
+            console.log("推荐,发送了");
+            movie_id = $(this).attr("id");
+            $.ajax({
+                type: "get",
+                url: "/getrecmendation",
+                data: {
+                    "id": movie_id
+                },
+                dataType: "json",
+                beforeSend: function() {
+                    // 设置disabled阻止用户继续点击
+                    $(this).attr("disabled", "disabled");
+                },
+                complete: function () {
+                    // 请求完成移除 disabled 属性
+                    $(this).removeAttr("disabled");
+                },
+                success: function(result){
+                    if(result.status == 200){
+                        var note_data = result.data;
+                        var replace_html = '<tr>'
+                            + '<td>' + note_data.id + '</td>'
+                            + '<td>' + note_data.content + '</td>'
+                            + '<td>' + note_data.nickname + '</td>'
+                            + '<td>' + note_data.ip_location + '</td>'
+                            + '<td>' + note_data.gender + '</td>'
+                            + '</tr>';
+                        $("#note-rec").append(replace_html);
+                    }else{
+                        alert("No result");
+                    }
+                },
+                error: function (jqXHR, textStatus, e) {
+                    alert("提交异常："+e);
+                }
+            });
+        })
+
 })

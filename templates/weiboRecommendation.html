@@ -30,6 +30,10 @@
                 <input id="weibosubmit2index" name="weibosubmit2index" type="button" class="form-control btn btn-success" value="新建索引">
             </div>
         </form>
+        <div id="note-rec">
+
+        </div>
+
         <div class="mt-4">
             <table id="note-result-list-table" class="table table-striped">
                 <thead>
@@ -55,6 +59,7 @@
                             <td>
                                 <input type="button" id="{{data.id}}" class="btn btn-success btn-pos" value="词性标注">
                                 <input type="button" id="{{data.id}}" class="btn btn-success btn-ner" value="命名实体识别">
+                                <input type="button" id="{{data.id}}" class="btn btn-success btn-rec" value="微博推荐">
                             </td>
                         </tr>
                     {% endfor %}
@@ -81,6 +86,7 @@
             </ul>
         </div>
     </div>
+
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 </body>
 </html>

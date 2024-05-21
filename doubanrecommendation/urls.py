@@ -48,7 +48,11 @@ urlpatterns = [
     url(r'questionanswer', views.questionAnswer, name='questionAnswer'),
     url(r'questionanswer', include('movierecommendation.urls')),
     #添加路由
-    url(r'^searchanswer', views.searchanswer)
+    url(r'^searchanswer', views.searchanswer),
+    #添加路由
+    url(r'^getrecmendation', views.getrecmendation)
+
+
 
 ]
 urlpatterns += staticfiles_urlpatterns()

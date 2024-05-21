@@ -18,5 +18,10 @@ urlpatterns = [
 
     url(r'questionanswer', views.questionAnswer, name='questionAnswer'),
     #添加路由
-    url(r'^searchanswer', views.searchanswer, name= 'searchAnswer')
+    url(r'^searchanswer', views.searchanswer, name= 'searchAnswer'),
+
+    #添加路由
+    url(r'^getrecmendation', views.searchanswer, name='getRecmendation'),
+
+
 ]

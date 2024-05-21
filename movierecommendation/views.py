@@ -631,3 +631,68 @@ def searchanswer(request):
                     'answer': 'No answer!'
                 }
         return HttpResponse(json.dumps(res), content_type='application/json')
+
+
+
+from sentence_transformers.util import cos_sim
+from sentence_transformers import SentenceTransformer as SBert
+
+# 定义推荐请求链接.
+@csrf_exempt
+def getrecmendation(request):
+    res = {
+        'status': 404,
+        'text': 'Unknown request!'
+    }
+    if request.method == 'GET':
+        # 获取当前需要标注的电影id
+        note_id = request.GET['id']
+        if note_id:
+            try:
+                start_time=time()
+                note_top = 0  #记录top-1的结果，也可以修改代码返回top-k
+                data_list = WeiboNotes.objects.all() #取出WeiboNotes表所有数据
+                if data_list:
+                    # 获取当前电影数据
+                    result = WeiboNotes.objects.get(id=note_id)
+                    content = result.content # + result.movie_directors + result.movie_actors + result.movie_description
+                    # 使用Bert模型
+                    modelBert = SBert('paraphrase-multilingual-MiniLM-L12-v2')
+                    # 计算嵌入
+                    embedding = modelBert.encode(content)
+                    cosine_scoretop = 0
+                    for data_rec in data_list:
+                        print(1)
+                        if result.content != data_rec.content:
+                            rec_embedding = modelBert.encode(data_rec.content)
+                            cosine_scores = cos_sim(embedding, rec_embedding)
+                            if time()-start_time>10:
+                                break
+                            if cosine_scores > cosine_scoretop:
+                                print(f'cosine_scores = {cosine_scores}, cosine_scoretop = {cosine_scoretop}')
+                                cosine_scoretop = cosine_scores
+                                note_top = data_rec
+                res_data={
+                    'id': note_top.note_id,
+                    'content': note_top.content,
+                    'nickname': note_top.nickname,
+                    'ip_location': note_top.ip_location,
+                    'gender': note_top.gender
+                }
+                if note_top:
+                   res = {
+                        'status': 200,
+                        'data': res_data
+                    }
+                else:
+                    res = {
+                        'status': 201,
+                        'data': 'No result!'
+                    }
+            except ObjectDoesNotExist:
+                res = {
+                    'status': 201,
+                    'data': 'No result!'
+                }
+    return HttpResponse(json.dumps(res), content_type='application/json')
+
